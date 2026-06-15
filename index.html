@@ -163,6 +163,7 @@
                 <div class="flex space-x-4 border-b border-slate-700 pb-4">
                     <button onclick="switchAdminTab('roster')" id="tab-roster" class="px-6 py-2 rounded-t bg-nbiGold text-nbiBlue font-bold uppercase text-sm tracking-wide transform transition-transform duration-150 ease-out hover:scale-105">📋 Roster Management</button>
                     <button onclick="switchAdminTab('news')" id="tab-news" class="px-6 py-2 rounded-t bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold uppercase text-sm tracking-wide transform transition-transform duration-150 ease-out hover:scale-105">📰 News Management</button>
+                    <button onclick="switchAdminTab('users')" id="tab-users" class="px-6 py-2 rounded-t bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold uppercase text-sm tracking-wide transform transition-transform duration-150 ease-out hover:scale-105">👥 User Management</button>
                 </div>
 
                 <!-- ROSTER MANAGEMENT PANEL -->
@@ -210,6 +211,41 @@
                                         </tr>
                                     </thead>
                                     <tbody id="admin-table-body">
+                                        <!-- Populated on load -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- USER MANAGEMENT PANEL -->
+                <div id="admin-panel-users" class="hidden space-y-6">
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <!-- Add User Form -->
+                        <div class="bg-nbiSlate p-6 rounded-xl border border-slate-700 space-y-4">
+                            <h3 class="text-md font-bold text-white uppercase border-b border-slate-700 pb-2">Grant Admin Access</h3>
+                            <form id="add-user-form" class="space-y-3 bg-slate-800 p-4 rounded">
+                                <div>
+                                    <label class="text-xs uppercase text-slate-400 block mb-1">User Email</label>
+                                    <input type="email" id="new-user-email" placeholder="user@example.com" required class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white focus:outline-none focus:border-red-500">
+                                </div>
+                                <button type="submit" class="w-full bg-nbiGold hover:bg-yellow-600 text-nbiBlue font-black py-2 rounded text-xs uppercase tracking-wider transition">Add Admin User</button>
+                            </form>
+                        </div>
+
+                        <!-- Admin Users List -->
+                        <div class="bg-nbiSlate p-6 rounded-xl border border-slate-700 space-y-4">
+                            <h3 class="text-md font-bold text-white uppercase border-b border-slate-700 pb-2">Authorized Admins</h3>
+                            <div class="overflow-x-auto max-h-96 overflow-y-auto">
+                                <table class="w-full text-left text-sm text-slate-300">
+                                    <thead class="text-xs uppercase text-slate-400 bg-slate-900">
+                                        <tr>
+                                            <th class="p-2">Email</th>
+                                            <th class="p-2">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="admin-users-table">
                                         <!-- Populated on load -->
                                     </tbody>
                                 </table>
@@ -271,23 +307,36 @@
     function switchAdminTab(tabName) {
         const rosterPanel = document.getElementById('admin-panel-roster');
         const newsPanel = document.getElementById('admin-panel-news');
+        const usersPanel = document.getElementById('admin-panel-users');
         const rosterTab = document.getElementById('tab-roster');
         const newsTab = document.getElementById('tab-news');
+        const usersTab = document.getElementById('tab-users');
         
+        // Hide all panels and reset all tabs
+        rosterPanel.classList.add('hidden');
+        newsPanel.classList.add('hidden');
+        usersPanel.classList.add('hidden');
+        rosterTab.classList.add('bg-slate-700', 'hover:bg-slate-600', 'text-slate-300');
+        rosterTab.classList.remove('bg-nbiGold', 'text-nbiBlue');
+        newsTab.classList.add('bg-slate-700', 'hover:bg-slate-600', 'text-slate-300');
+        newsTab.classList.remove('bg-nbiGold', 'text-nbiBlue');
+        usersTab.classList.add('bg-slate-700', 'hover:bg-slate-600', 'text-slate-300');
+        usersTab.classList.remove('bg-nbiGold', 'text-nbiBlue');
+        
+        // Show selected panel and highlight tab
         if (tabName === 'roster') {
             rosterPanel.classList.remove('hidden');
-            newsPanel.classList.add('hidden');
             rosterTab.classList.remove('bg-slate-700', 'hover:bg-slate-600', 'text-slate-300');
             rosterTab.classList.add('bg-nbiGold', 'text-nbiBlue');
-            newsTab.classList.remove('bg-nbiGold', 'text-nbiBlue');
-            newsTab.classList.add('bg-slate-700', 'hover:bg-slate-600', 'text-slate-300');
         } else if (tabName === 'news') {
-            rosterPanel.classList.add('hidden');
             newsPanel.classList.remove('hidden');
-            rosterTab.classList.remove('bg-nbiGold', 'text-nbiBlue');
-            rosterTab.classList.add('bg-slate-700', 'hover:bg-slate-600', 'text-slate-300');
             newsTab.classList.remove('bg-slate-700', 'hover:bg-slate-600', 'text-slate-300');
             newsTab.classList.add('bg-nbiGold', 'text-nbiBlue');
+        } else if (tabName === 'users') {
+            usersPanel.classList.remove('hidden');
+            usersTab.classList.remove('bg-slate-700', 'hover:bg-slate-600', 'text-slate-300');
+            usersTab.classList.add('bg-nbiGold', 'text-nbiBlue');
+            loadAdminUsers();
         }
     }
 
@@ -562,6 +611,63 @@
     }
 
     async function handleLogout() { if (!supabaseClient) return; await supabaseClient.auth.signOut(); }
+
+    // Load list of admin users
+    async function loadAdminUsers() {
+        if (!supabaseClient) return;
+        const { data: users, error } = await supabaseClient.from('admin_users').select('*').order('created_at', { ascending: false });
+        if (error) return console.error(error);
+        if (typeof document === 'undefined') return;
+        const container = document.getElementById('admin-users-table');
+        if (!container) return;
+        container.innerHTML = '';
+        if (!users || users.length === 0) {
+            container.innerHTML = '<tr><td colspan="2" class="p-4 text-center text-slate-500">No admin users yet</td></tr>';
+            return;
+        }
+        users.forEach(user => {
+            container.innerHTML += `
+                <tr class="border-b border-slate-800 hover:bg-slate-800/50">
+                    <td class="p-2 text-white font-mono text-sm truncate">${user.email}</td>
+                    <td class="p-2">
+                        <button onclick="deleteAdminUser(${user.id})" class="text-red-400 text-xs uppercase font-bold hover:text-red-300">Revoke</button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    // Add new admin user
+    async function addAdminUser(email) {
+        if (!supabaseClient) return;
+        const { error } = await supabaseClient.from('admin_users').insert([{ email: email.toLowerCase() }]);
+        if (error) return alert(`Error: ${error.message}`);
+        alert(`Admin access granted to ${email}`);
+        document.getElementById('new-user-email').value = '';
+        loadAdminUsers();
+    }
+
+    // Delete admin user
+    async function deleteAdminUser(id) {
+        if (typeof window === 'undefined' || !confirm('Revoke admin access for this user?')) return;
+        const { error } = await supabaseClient.from('admin_users').delete().eq('id', id);
+        if (error) alert(error.message);
+        else loadAdminUsers();
+    }
+
+    // Attach event listener for add user form
+    if (typeof document !== 'undefined') {
+        const addUserForm = document.getElementById('add-user-form');
+        if (addUserForm) {
+            addUserForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const emailEl = document.getElementById('new-user-email');
+                const email = emailEl ? emailEl.value.trim() : '';
+                if (!email) return alert('Please enter an email.');
+                await addAdminUser(email);
+            });
+        }
+    }
 
     if (typeof window !== 'undefined') initSupabase();
     </script>
