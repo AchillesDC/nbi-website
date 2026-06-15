@@ -1,0 +1,14 @@
+{
+  "name": "fbi-portal",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "npx serve . -s",
+    "dev": "vercel dev",
+    "test:supabase": "node test-supabase.js",
+    "lint": "echo \"No linter configured\""
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.35.0"
+  }
+}

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1">
+      <stop offset="0" stop-color="#FFD54A"/>
+      <stop offset="1" stop-color="#D4AF37"/>
+    </linearGradient>
+  </defs>
+  <rect width="100%" height="100%" rx="64" fill="#0A192F" />
+  <circle cx="400" cy="120" r="64" fill="url(#g)" stroke="#f3e2b3" stroke-width="6" />
+  <text x="400" y="132" font-family="sans-serif" font-weight="700" font-size="28" fill="#071226" text-anchor="middle">FBI</text>
+  <g transform="translate(80,220)">
+    <text x="0" y="0" font-family="sans-serif" font-weight="800" font-size="40" fill="#fff">Federal Bureau</text>
+    <text x="0" y="48" font-family="sans-serif" font-weight="800" font-size="40" fill="#fff">of Investigation</text>
+  </g>
+</svg>
