@@ -29,7 +29,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
                 <div class="flex items-center space-x-3 cursor-pointer select-none" onclick="navigateTo('home')">
-                    <img src="/public/fbi-logo.png" alt="FBI Logo" class="w-12 h-12 object-contain">
+                    <img src="/fbi-logo.png" alt="FBI Logo" class="w-12 h-12 object-contain">
                     <div>
                         <span class="font-extrabold text-xl tracking-wider block text-white">F.B.I.</span>
                         <span class="text-[10px] text-nbiGold uppercase tracking-widest font-bold block">Federal Bureau of Investigation</span>
@@ -57,7 +57,7 @@
                 </div>
                 
                 <!-- FBI LOGO IMAGE -->
-                <img src="/public/fbi-logo.png" alt="FBI Logo" class="w-32 h-32 md:w-40 md:h-40 object-contain">
+                <img src="/fbi-logo.png" alt="FBI Logo" class="w-32 h-32 md:w-40 md:h-40 object-contain">
             </div>
 
             <!-- NEWS FEED SECTION -->
@@ -159,11 +159,19 @@
                     <button onclick="handleLogout()" class="bg-slate-700 hover:bg-slate-600 text-xs text-white px-3 py-1.5 rounded uppercase font-bold">Disconnect</button>
                 </div>
 
-                <div class="grid md:grid-cols-3 gap-8">
-                    <!-- Insertion Utility Form Module --
-                    <div class="bg-nbiSlate p-6 rounded-xl border border-slate-700 space-y-4 h-fit">
-                        <h3 class="text-md font-bold text-white uppercase border-b border-slate-700 pb-2">Add New Personnel</h3>
-                        <form id="add-agent-form" class="space-y-3">
+                <!-- TAB NAVIGATION -->
+                <div class="flex space-x-4 border-b border-slate-700 pb-4">
+                    <button onclick="switchAdminTab('roster')" id="tab-roster" class="px-6 py-2 rounded-t bg-nbiGold text-nbiBlue font-bold uppercase text-sm tracking-wide transform transition-transform duration-150 ease-out hover:scale-105">📋 Roster Management</button>
+                    <button onclick="switchAdminTab('news')" id="tab-news" class="px-6 py-2 rounded-t bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold uppercase text-sm tracking-wide transform transition-transform duration-150 ease-out hover:scale-105">📰 News Management</button>
+                </div>
+
+                <!-- ROSTER MANAGEMENT PANEL -->
+                <div id="admin-panel-roster" class="space-y-6">
+                    <div class="grid md:grid-cols-3 gap-8">
+                        <!-- Add Personnel Form -->
+                        <div class="bg-nbiSlate p-6 rounded-xl border border-slate-700 space-y-4 h-fit">
+                            <h3 class="text-md font-bold text-white uppercase border-b border-slate-700 pb-2">Add New Personnel</h3>
+                            <form id="add-agent-form" class="space-y-3">
                             <!-- Inside <form id="add-agent-form"> -->
                             <div>
                                 <label class="text-xs uppercase text-slate-400 block mb-1">Agent Image URL (Optional)</label>
@@ -189,31 +197,34 @@
                         </form>
                     </div>
 
-                    <!-- Live Records Table with Immediate Delete Powers -->
-                    <div class="md:col-span-2 bg-nbiSlate p-6 rounded-xl border border-slate-700 space-y-4">
-                        <h3 class="text-md font-bold text-white uppercase border-b border-slate-700 pb-2">Active Network Directory Database Records</h3>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left text-sm text-slate-300">
-                                <thead class="text-xs uppercase text-slate-400 bg-slate-900">
-                                    <tr>
-                                        <th class="p-3">Agent Code Name</th>
-                                        <th class="p-3">Rank Designation</th>
-                                        <th class="p-3">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="admin-table-body">
-                                    <!-- Populated on load -->
-                                </tbody>
-                            </table>
+                        <!-- Live Records Table with Immediate Delete Powers -->
+                        <div class="md:col-span-2 bg-nbiSlate p-6 rounded-xl border border-slate-700 space-y-4">
+                            <h3 class="text-md font-bold text-white uppercase border-b border-slate-700 pb-2">Active Network Directory</h3>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-sm text-slate-300">
+                                    <thead class="text-xs uppercase text-slate-400 bg-slate-900">
+                                        <tr>
+                                            <th class="p-3">Agent Code Name</th>
+                                            <th class="p-3">Rank Designation</th>
+                                            <th class="p-3">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="admin-table-body">
+                                        <!-- Populated on load -->
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
-                
-                    <!-- News Management Module -->
-                    <div class="md:col-span-3 bg-nbiSlate p-6 rounded-xl border border-slate-700 space-y-4">
-                        <h3 class="text-md font-bold text-white uppercase border-b border-slate-700 pb-2">News Management</h3>
-                        <div class="grid md:grid-cols-2 gap-6">
-                            <div>
-                                <form id="add-news-form" class="space-y-3 bg-slate-800 p-4 rounded">
+                </div>
+
+                <!-- NEWS MANAGEMENT PANEL -->
+                <div id="admin-panel-news" class="hidden space-y-6">
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <!-- News Form -->
+                        <div class="bg-nbiSlate p-6 rounded-xl border border-slate-700 space-y-4">
+                            <h3 class="text-md font-bold text-white uppercase border-b border-slate-700 pb-2">Publish News Article</h3>
+                            <form id="add-news-form" class="space-y-3 bg-slate-800 p-4 rounded">
                                     <input type="hidden" id="news-id" value="">
                                     <div>
                                         <label class="text-xs uppercase text-slate-400 block mb-1">Title</label>
@@ -224,25 +235,25 @@
                                         <textarea id="news-content" rows="4" placeholder="Full content goes here..." required class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white focus:outline-none"></textarea>
                                     </div>
                                     <button type="submit" id="news-submit-btn" class="w-full bg-nbiGold hover:bg-yellow-600 text-nbiBlue font-black py-2 rounded text-xs uppercase tracking-wider transition">Publish News</button>
-                                </form>
-                            </div>
+                            </form>
+                        </div>
 
-                            <div>
-                                <div class="overflow-x-auto max-h-64 overflow-y-auto">
-                                    <table class="w-full text-left text-sm text-slate-300">
-                                        <thead class="text-xs uppercase text-slate-400 bg-slate-900">
-                                            <tr>
-                                                <th class="p-2">Title</th>
-                                                <th class="p-2">Content</th>
-                                                <th class="p-2">Date</th>
-                                                <th class="p-2">Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="admin-news-table">
-                                            <!-- Populated on load -->
-                                        </tbody>
-                                    </table>
-                                </div>
+                        <!-- News Table -->
+                        <div class="bg-nbiSlate p-6 rounded-xl border border-slate-700 space-y-4">
+                            <h3 class="text-md font-bold text-white uppercase border-b border-slate-700 pb-2">Published Articles</h3>
+                            <div class="overflow-x-auto max-h-96 overflow-y-auto">
+                                <table class="w-full text-left text-sm text-slate-300">
+                                    <thead class="text-xs uppercase text-slate-400 bg-slate-900">
+                                        <tr>
+                                            <th class="p-2">Title</th>
+                                            <th class="p-2">Date</th>
+                                            <th class="p-2">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="admin-news-table">
+                                        <!-- Populated on load -->
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -256,6 +267,30 @@
     </footer>
 
     <script>
+    /** Admin Tab Switching */
+    function switchAdminTab(tabName) {
+        const rosterPanel = document.getElementById('admin-panel-roster');
+        const newsPanel = document.getElementById('admin-panel-news');
+        const rosterTab = document.getElementById('tab-roster');
+        const newsTab = document.getElementById('tab-news');
+        
+        if (tabName === 'roster') {
+            rosterPanel.classList.remove('hidden');
+            newsPanel.classList.add('hidden');
+            rosterTab.classList.remove('bg-slate-700', 'hover:bg-slate-600', 'text-slate-300');
+            rosterTab.classList.add('bg-nbiGold', 'text-nbiBlue');
+            newsTab.classList.remove('bg-nbiGold', 'text-nbiBlue');
+            newsTab.classList.add('bg-slate-700', 'hover:bg-slate-600', 'text-slate-300');
+        } else if (tabName === 'news') {
+            rosterPanel.classList.add('hidden');
+            newsPanel.classList.remove('hidden');
+            rosterTab.classList.remove('bg-nbiGold', 'text-nbiBlue');
+            rosterTab.classList.add('bg-slate-700', 'hover:bg-slate-600', 'text-slate-300');
+            newsTab.classList.remove('bg-slate-700', 'hover:bg-slate-600', 'text-slate-300');
+            newsTab.classList.add('bg-nbiGold', 'text-nbiBlue');
+        }
+    }
+
     /** Inlined app.js */
     function navigateTo(targetPageId) {
         const pages = document.querySelectorAll('.page-section');
@@ -364,13 +399,12 @@
         container.innerHTML = '';
         news.forEach(post => {
             container.innerHTML += `
-                <tr class="border-b border-slate-800">
-                    <td class="p-3 text-white font-bold">${post.title}</td>
-                    <td class="p-3 text-slate-400 text-sm">${post.content}</td>
-                    <td class="p-3 text-xs text-slate-500">${new Date(post.created_at).toLocaleString()}</td>
-                    <td class="p-3">
-                        <button onclick="editNews(${post.id})" class="text-nbiGold text-xs uppercase font-bold mr-3">Edit</button>
-                        <button onclick="deleteNews(${post.id})" class="text-red-400 text-xs uppercase font-bold">Delete</button>
+                <tr class="border-b border-slate-800 hover:bg-slate-800/50">
+                    <td class="p-2 text-white font-bold truncate">${post.title}</td>
+                    <td class="p-2 text-xs text-slate-500">${new Date(post.created_at).toLocaleDateString()}</td>
+                    <td class="p-2 flex space-x-2">
+                        <button onclick="editNews(${post.id})" class="text-nbiGold text-xs uppercase font-bold hover:text-yellow-400">Edit</button>
+                        <button onclick="deleteNews(${post.id})" class="text-red-400 text-xs uppercase font-bold hover:text-red-300">Delete</button>
                     </td>
                 </tr>
             `;
