@@ -224,24 +224,30 @@
                     <div class="grid md:grid-cols-2 gap-8">
                         <!-- Add User Form -->
                         <div class="bg-nbiSlate p-6 rounded-xl border border-slate-700 space-y-4">
-                            <h3 class="text-md font-bold text-white uppercase border-b border-slate-700 pb-2">Grant Admin Access</h3>
+                            <h3 class="text-md font-bold text-white uppercase border-b border-slate-700 pb-2">Create News Editor</h3>
                             <form id="add-user-form" class="space-y-3 bg-slate-800 p-4 rounded">
                                 <div>
                                     <label class="text-xs uppercase text-slate-400 block mb-1">User Email</label>
                                     <input type="email" id="new-user-email" placeholder="user@example.com" required class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white focus:outline-none focus:border-red-500">
                                 </div>
-                                <button type="submit" class="w-full bg-nbiGold hover:bg-yellow-600 text-nbiBlue font-black py-2 rounded text-xs uppercase tracking-wider transition">Add Admin User</button>
+                                <div>
+                                    <label class="text-xs uppercase text-slate-400 block mb-1">Password</label>
+                                    <input type="password" id="new-user-password" placeholder="••••••••" minlength="8" required class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white focus:outline-none focus:border-red-500">
+                                </div>
+                                <p class="text-xs text-slate-500">📝 New users can only publish & manage news articles</p>
+                                <button type="submit" class="w-full bg-nbiGold hover:bg-yellow-600 text-nbiBlue font-black py-2 rounded text-xs uppercase tracking-wider transition">Create News Editor</button>
                             </form>
                         </div>
 
                         <!-- Admin Users List -->
                         <div class="bg-nbiSlate p-6 rounded-xl border border-slate-700 space-y-4">
-                            <h3 class="text-md font-bold text-white uppercase border-b border-slate-700 pb-2">Authorized Admins</h3>
+                            <h3 class="text-md font-bold text-white uppercase border-b border-slate-700 pb-2">News Editors</h3>
                             <div class="overflow-x-auto max-h-96 overflow-y-auto">
                                 <table class="w-full text-left text-sm text-slate-300">
                                     <thead class="text-xs uppercase text-slate-400 bg-slate-900">
                                         <tr>
                                             <th class="p-2">Email</th>
+                                            <th class="p-2">Role</th>
                                             <th class="p-2">Actions</th>
                                         </tr>
                                     </thead>
@@ -516,9 +522,9 @@
         });
     }
 
-    function monitorAuthState() {
+    async function monitorAuthState() {
         if (!supabaseClient || typeof supabaseClient.auth === 'undefined') return;
-        supabaseClient.auth.onAuthStateChange((event, session) => {
+        supabaseClient.auth.onAuthStateChange(async (event, session) => {
             if (typeof document === 'undefined') return;
             const loginBox = document.getElementById('admin-login-box');
             const controlDashboard = document.getElementById('admin-control-dashboard');
@@ -526,6 +532,7 @@
             if (session) {
                 loginBox.classList.add('hidden');
                 controlDashboard.classList.remove('hidden');
+                await updateAdminPanelForRole();
             } else {
                 loginBox.classList.remove('hidden');
                 controlDashboard.classList.add('hidden');
@@ -612,6 +619,15 @@
 
     async function handleLogout() { if (!supabaseClient) return; await supabaseClient.auth.signOut(); }
 
+    // Get current user's role
+    async function getCurrentUserRole() {
+        if (!supabaseClient) return null;
+        const { data: { user } } = await supabaseClient.auth.getUser();
+        if (!user) return null;
+        const { data: adminRecord } = await supabaseClient.from('admin_users').select('role').eq('email', user.email).single();
+        return adminRecord?.role || null;
+    }
+
     // Load list of admin users
     async function loadAdminUsers() {
         if (!supabaseClient) return;
@@ -622,37 +638,71 @@
         if (!container) return;
         container.innerHTML = '';
         if (!users || users.length === 0) {
-            container.innerHTML = '<tr><td colspan="2" class="p-4 text-center text-slate-500">No admin users yet</td></tr>';
+            container.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-slate-500">No news editors yet</td></tr>';
             return;
         }
         users.forEach(user => {
+            const roleLabel = user.role === 'full' ? '👑 Full Admin' : '📝 News Editor';
             container.innerHTML += `
                 <tr class="border-b border-slate-800 hover:bg-slate-800/50">
                     <td class="p-2 text-white font-mono text-sm truncate">${user.email}</td>
+                    <td class="p-2 text-xs text-slate-400">${roleLabel}</td>
                     <td class="p-2">
-                        <button onclick="deleteAdminUser(${user.id})" class="text-red-400 text-xs uppercase font-bold hover:text-red-300">Revoke</button>
+                        <button onclick="deleteAdminUser(${user.id})" class="text-red-400 text-xs uppercase font-bold hover:text-red-300">Remove</button>
                     </td>
                 </tr>
             `;
         });
     }
 
-    // Add new admin user
-    async function addAdminUser(email) {
+    // Add new news editor (limited admin)
+    async function addAdminUser(email, password) {
         if (!supabaseClient) return;
-        const { error } = await supabaseClient.from('admin_users').insert([{ email: email.toLowerCase() }]);
-        if (error) return alert(`Error: ${error.message}`);
-        alert(`Admin access granted to ${email}`);
-        document.getElementById('new-user-email').value = '';
-        loadAdminUsers();
+        try {
+            // Create auth user
+            const { data: newUser, error: signUpError } = await supabaseClient.auth.admin.createUser({
+                email: email.toLowerCase(),
+                password: password,
+                email_confirm: true
+            });
+            if (signUpError) return alert(`Auth Error: ${signUpError.message}`);
+            // Add to admin_users with news_only role
+            const { error: dbError } = await supabaseClient.from('admin_users').insert([{
+                email: email.toLowerCase(),
+                role: 'news_only',
+                auth_user_id: newUser.user.id
+            }]);
+            if (dbError) return alert(`Database Error: ${dbError.message}`);
+            alert(`News Editor created: ${email}\nThey can now log in and publish articles.`);
+            document.getElementById('new-user-email').value = '';
+            document.getElementById('new-user-password').value = '';
+            loadAdminUsers();
+        } catch (err) {
+            alert(`Error: ${err.message}`);
+        }
     }
 
     // Delete admin user
     async function deleteAdminUser(id) {
-        if (typeof window === 'undefined' || !confirm('Revoke admin access for this user?')) return;
+        if (typeof window === 'undefined' || !confirm('Remove this news editor?')) return;
         const { error } = await supabaseClient.from('admin_users').delete().eq('id', id);
         if (error) alert(error.message);
         else loadAdminUsers();
+    }
+
+    // Hide tabs based on user role
+    async function updateAdminPanelForRole() {
+        const role = await getCurrentUserRole();
+        if (typeof document === 'undefined') return;
+        const rosterTab = document.getElementById('tab-roster');
+        const usersTab = document.getElementById('tab-users');
+        if (role === 'news_only') {
+            // Hide roster and user tabs for news-only editors
+            if (rosterTab) rosterTab.style.display = 'none';
+            if (usersTab) usersTab.style.display = 'none';
+            // Auto-switch to news tab
+            switchAdminTab('news');
+        }
     }
 
     // Attach event listener for add user form
@@ -662,9 +712,12 @@
             addUserForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const emailEl = document.getElementById('new-user-email');
+                const passwordEl = document.getElementById('new-user-password');
                 const email = emailEl ? emailEl.value.trim() : '';
-                if (!email) return alert('Please enter an email.');
-                await addAdminUser(email);
+                const password = passwordEl ? passwordEl.value.trim() : '';
+                if (!email || !password) return alert('Please enter email and password.');
+                if (password.length < 8) return alert('Password must be at least 8 characters.');
+                await addAdminUser(email, password);
             });
         }
     }
