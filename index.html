@@ -29,18 +29,18 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
                 <div class="flex items-center space-x-3 cursor-pointer select-none" onclick="navigateTo('home')">
-                    <img src="public/fbi-logo.svg" alt="FBI Logo" class="w-12 h-12 object-contain">
+                    <img src="public/fbi-logo.png" alt="FBI Logo" class="w-12 h-12 object-contain">
                     <div>
                         <span class="font-extrabold text-xl tracking-wider block text-white">F.B.I.</span>
                         <span class="text-[10px] text-nbiGold uppercase tracking-widest font-bold block">Federal Bureau of Investigation</span>
                     </div>
                 </div>
                 <div class="flex space-x-2 font-semibold text-sm">
-                    <button id="nav-home" onclick="navigateTo('home')" class="px-4 py-2 rounded-md text-nbiGold bg-slate-800/60 border border-nbiGold/30">Home</button>
-                    <button id="nav-info" onclick="navigateTo('info')" class="px-4 py-2 rounded-md text-slate-300 hover:bg-slate-800/40">Information</button>
-                    <button id="nav-roster" onclick="navigateTo('roster')" class="px-4 py-2 rounded-md text-slate-300 hover:bg-slate-800/40">Roster</button>
-                    <button id="nav-apply" onclick="navigateTo('apply')" class="px-4 py-2 rounded-md text-slate-300 hover:bg-slate-800/40">Apply Now</button>
-                    <button id="nav-admin" onclick="navigateTo('admin')" class="px-4 py-2 rounded-md text-red-400 border border-red-500/30 hover:bg-red-500/10">Admin Portal</button>
+                    <button id="nav-home" onclick="navigateTo('home')" class="px-4 py-2 rounded-md text-nbiGold bg-slate-800/60 border border-nbiGold/30 transform transition-transform duration-150 ease-out hover:scale-105">Home</button>
+                    <button id="nav-info" onclick="navigateTo('info')" class="px-4 py-2 rounded-md text-slate-300 hover:bg-slate-800/40 transform transition-transform duration-150 ease-out hover:scale-105">Information</button>
+                    <button id="nav-roster" onclick="navigateTo('roster')" class="px-4 py-2 rounded-md text-slate-300 hover:bg-slate-800/40 transform transition-transform duration-150 ease-out hover:scale-105">Roster</button>
+                    <button id="nav-apply" onclick="navigateTo('apply')" class="px-4 py-2 rounded-md text-slate-300 hover:bg-slate-800/40 transform transition-transform duration-150 ease-out hover:scale-105">Apply Now</button>
+                    <button id="nav-admin" onclick="navigateTo('admin')" class="px-4 py-2 rounded-md text-red-400 border border-red-500/30 hover:bg-red-500/10 transform transition-transform duration-150 ease-out hover:scale-105">Admin Portal</button>
                 </div>
             </div>
         </div>
@@ -57,7 +57,7 @@
                 </div>
                 
                 <!-- FBI LOGO IMAGE -->
-                <img src="public/fbi-logo.svg" alt="FBI Logo" class="w-32 h-32 md:w-40 md:h-40 object-contain">
+                <img src="public/fbi-logo.png" alt="FBI Logo" class="w-32 h-32 md:w-40 md:h-40 object-contain">
             </div>
 
             <!-- NEWS FEED SECTION -->
@@ -68,6 +68,18 @@
                         <p class="text-nbiGold text-xs tracking-wider uppercase font-mono mt-1">Breaking Updates</p>
                     </div>
                     <div id="news-feed" class="space-y-3"></div>
+
+                    <!-- News Modal (hidden until opened) -->
+                    <div id="news-modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50">
+                        <div class="bg-nbiSlate max-w-3xl w-full mx-4 md:mx-0 rounded-xl p-6 border border-slate-700 shadow-2xl">
+                            <div class="flex justify-between items-start mb-4">
+                                <h3 id="news-modal-title" class="text-xl font-bold text-white"></h3>
+                                <button id="news-modal-close" class="text-slate-300 hover:text-white">✕</button>
+                            </div>
+                            <p id="news-modal-date" class="text-xs text-slate-400 mb-4"></p>
+                            <div id="news-modal-body" class="text-slate-300 text-sm"></div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- USEFUL LINKS SECTION -->
@@ -301,11 +313,46 @@
         if (!container) return;
         container.innerHTML = data.map(post => `
             <div class="bg-nbiSlate p-4 rounded border border-slate-800">
-                <h3 class="text-white font-bold">${post.title}</h3>
-                <p class="text-slate-400 text-sm">${post.content}</p>
+                <h3 class="text-white font-bold cursor-pointer" onclick="showNews(${post.id})">${post.title}</h3>
+                <p class="text-slate-400 text-sm">${(post.content && post.content.length > 160) ? post.content.slice(0,160) + '…' : (post.content || '')}</p>
             </div>
         `).join('');
     }
+
+    // Show full news article in modal
+    async function showNews(id) {
+        if (!supabaseClient) return;
+        const modal = document.getElementById('news-modal');
+        const titleEl = document.getElementById('news-modal-title');
+        const dateEl = document.getElementById('news-modal-date');
+        const bodyEl = document.getElementById('news-modal-body');
+        try {
+            const { data, error } = await supabaseClient.from('news').select('*').eq('id', id).limit(1).single();
+            if (error) throw error;
+            if (!data) return alert('Article not found');
+            titleEl.textContent = data.title || '';
+            dateEl.textContent = data.created_at ? new Date(data.created_at).toLocaleString() : '';
+            bodyEl.textContent = data.content || '';
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        } catch (err) {
+            alert(err.message || 'Failed to load article');
+        }
+    }
+
+    function closeNews() {
+        const modal = document.getElementById('news-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    // hook up modal close behavior
+    document.addEventListener('DOMContentLoaded', () => {
+        const closeBtn = document.getElementById('news-modal-close');
+        const modal = document.getElementById('news-modal');
+        if (closeBtn) closeBtn.addEventListener('click', closeNews);
+        if (modal) modal.addEventListener('click', (e) => { if (e.target && e.target.id === 'news-modal') closeNews(); });
+    });
 
     async function loadNews() {
         if (!supabaseClient) return;
