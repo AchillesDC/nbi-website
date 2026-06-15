@@ -8,11 +8,61 @@ async function initSupabase() {
         if (config.supabaseUrl && config.supabaseKey) {
             supabaseClient = supabase.createClient(config.supabaseUrl, config.supabaseKey);
             loadLiveRoster(); // Check database dynamically immediately on site view
+            loadNews();
             monitorAuthState();
         }
     } catch (err) {
         console.error("Secure DB Handshake Failed:", err);
     }
+}
+loadPublicNews(); // Load public news feed for all visitors on initial page load
+async function loadPublicNews() {
+    const { data } = await supabaseClient
+        .from('news')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+    const container = document.getElementById('news-feed');
+
+    container.innerHTML = data.map(post => `
+        <div class="bg-nbiSlate p-4 rounded border border-slate-800">
+            <h3 class="text-white font-bold">${post.title}</h3>
+            <p class="text-slate-400 text-sm">${post.content}</p>
+        </div>
+    `).join('');
+}
+
+async function loadNews() {
+    if (!supabaseClient) return;
+
+    const { data: news, error } = await supabaseClient
+        .from('news')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+    if (error) return console.error(error);
+
+    const container = document.getElementById('admin-news-table');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    news.forEach(post => {
+        container.innerHTML += `
+            <tr class="border-b border-slate-800">
+                <td class="p-3 text-white font-bold">${post.title}</td>
+                <td class="p-3 text-slate-400 text-sm">${post.content}</td>
+                <td class="p-3 text-xs text-slate-500">${new Date(post.created_at).toLocaleString()}</td>
+                <td class="p-3">
+                    <button onclick="deleteNews(${post.id})"
+                        class="text-red-400 text-xs uppercase font-bold">
+                        Delete
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
 }
 
 // Render out Roster profiles to regular users and the Admin panel dynamically
@@ -82,6 +132,36 @@ function monitorAuthState() {
             controlDashboard.classList.add('hidden');
         }
     });
+}
+
+document.getElementById('add-news-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const title = document.getElementById('news-title').value;
+    const content = document.getElementById('news-content').value;
+
+    const { error } = await supabaseClient
+        .from('news')
+        .insert([{ title, content }]);
+
+    if (error) {
+        alert(error.message);
+    } else {
+        document.getElementById('add-news-form').reset();
+        loadNews();
+    }
+});
+
+async function deleteNews(id) {
+    if (!confirm("Delete this news post?")) return;
+
+    const { error } = await supabaseClient
+        .from('news')
+        .delete()
+        .eq('id', id);
+
+    if (error) alert(error.message);
+    else loadNews();
 }
 
 // Handle Login Requests
