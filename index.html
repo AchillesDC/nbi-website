@@ -117,28 +117,6 @@
                 </div>
 
                 <div class="grid md:grid-cols-3 gap-8">
-
-                    <!-- NEWS CONTROL MODULE -->
-                    <div class="bg-nbiSlate p-6 rounded-xl border border-slate-700 space-y-4">
-                        <h3 class="text-md font-bold text-white uppercase border-b border-slate-700 pb-2"> News Management Terminal </h3>
-                        <form id="add-news-form" class="space-y-3">
-                        <input id="news-title"
-                        placeholder="News Title"
-                        class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white">
-
-                        <textarea id="news-content"
-                        placeholder="News Content"
-                        class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white"></textarea>
-
-                        <button type="submit"
-                        class="w-full bg-nbiGold text-nbiBlue font-black py-2 rounded uppercase text-xs">Publish News </button>
-                        </form>
-
-                        <table class="w-full text-sm mt-4">
-                        <tbody id="admin-news-table"></tbody>
-                        </table>
-                    </div>
-
                     <!-- Insertion Utility Form Module --
                     <div class="bg-nbiSlate p-6 rounded-xl border border-slate-700 space-y-4 h-fit">
                         <h3 class="text-md font-bold text-white uppercase border-b border-slate-700 pb-2">Add New Personnel</h3>
@@ -184,6 +162,45 @@
                                     <!-- Populated on load -->
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+                
+                    <!-- News Management Module -->
+                    <div class="md:col-span-3 bg-nbiSlate p-6 rounded-xl border border-slate-700 space-y-4">
+                        <h3 class="text-md font-bold text-white uppercase border-b border-slate-700 pb-2">News Management</h3>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <form id="add-news-form" class="space-y-3 bg-slate-800 p-4 rounded">
+                                    <input type="hidden" id="news-id" value="">
+                                    <div>
+                                        <label class="text-xs uppercase text-slate-400 block mb-1">Title</label>
+                                        <input type="text" id="news-title" placeholder="Breaking: ..." required class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white focus:outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="text-xs uppercase text-slate-400 block mb-1">Content</label>
+                                        <textarea id="news-content" rows="4" placeholder="Full content goes here..." required class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white focus:outline-none"></textarea>
+                                    </div>
+                                    <button type="submit" id="news-submit-btn" class="w-full bg-nbiGold hover:bg-yellow-600 text-nbiBlue font-black py-2 rounded text-xs uppercase tracking-wider transition">Publish News</button>
+                                </form>
+                            </div>
+
+                            <div>
+                                <div class="overflow-x-auto max-h-64 overflow-y-auto">
+                                    <table class="w-full text-left text-sm text-slate-300">
+                                        <thead class="text-xs uppercase text-slate-400 bg-slate-900">
+                                            <tr>
+                                                <th class="p-2">Title</th>
+                                                <th class="p-2">Content</th>
+                                                <th class="p-2">Date</th>
+                                                <th class="p-2">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="admin-news-table">
+                                            <!-- Populated on load -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
