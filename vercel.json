@@ -6,6 +6,8 @@
   ],
   "routes": [
     { "src": "/api/config", "dest": "/api/config.js" },
+    { "src": "/fbi-logo.png", "dest": "/public/fbi-logo.png" },
+    { "src": "/fbi-logo.svg", "dest": "/public/fbi-logo.svg" },
     { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
