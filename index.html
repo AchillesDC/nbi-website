@@ -659,20 +659,24 @@
     async function addAdminUser(email, password) {
         if (!supabaseClient) return;
         try {
-            // Create auth user
-            const { data: newUser, error: signUpError } = await supabaseClient.auth.admin.createUser({
-                email: email.toLowerCase(),
-                password: password,
-                email_confirm: true
+            // Get current user's session
+            const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+            if (sessionError || !session) return alert('You must be logged in to create users.');
+
+            // Call backend API to create user
+            const response = await fetch('/api/create-user', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: email.toLowerCase(),
+                    password: password,
+                    authToken: session.access_token
+                })
             });
-            if (signUpError) return alert(`Auth Error: ${signUpError.message}`);
-            // Add to admin_users with news_only role
-            const { error: dbError } = await supabaseClient.from('admin_users').insert([{
-                email: email.toLowerCase(),
-                role: 'news_only',
-                auth_user_id: newUser.user.id
-            }]);
-            if (dbError) return alert(`Database Error: ${dbError.message}`);
+
+            const result = await response.json();
+            if (!response.ok) return alert(`Error: ${result.error}`);
+            
             alert(`News Editor created: ${email}\nThey can now log in and publish articles.`);
             document.getElementById('new-user-email').value = '';
             document.getElementById('new-user-password').value = '';
