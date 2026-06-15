@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>National Bureau of Investigation — Federal Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase Official JS Library CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        nbiBlue: '#0A192F',
+                        nbiDarkBlue: '#060D1A',
+                        nbiGold: '#D4AF37',
+                        nbiSlate: '#1E293B'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-nbiDarkBlue text-slate-100 font-sans flex flex-col min-h-screen selection:bg-nbiGold selection:text-nbiBlue">
+
+    <!-- NAVIGATION BAR -->
+    <nav class="bg-nbiBlue border-b-2 border-nbiGold sticky top-0 z-50 shadow-2xl">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex items-center space-x-3 cursor-pointer select-none" onclick="navigateTo('home')">
+                    <div class="w-12 h-12 bg-gradient-to-br from-yellow-400 via-nbiGold to-yellow-600 rounded-full flex items-center justify-center font-black text-nbiBlue shadow-md tracking-tighter text-sm border border-yellow-300">NBI</div>
+                    <div>
+                        <span class="font-extrabold text-xl tracking-wider block text-white">N.B.I.</span>
+                        <span class="text-[10px] text-nbiGold uppercase tracking-widest font-bold block">National Bureau of Investigation</span>
+                    </div>
+                </div>
+                <div class="flex space-x-2 font-semibold text-sm">
+                    <button id="nav-home" onclick="navigateTo('home')" class="px-4 py-2 rounded-md text-nbiGold bg-slate-800/60 border border-nbiGold/30">Home</button>
+                    <button id="nav-info" onclick="navigateTo('info')" class="px-4 py-2 rounded-md text-slate-300 hover:bg-slate-800/40">Information</button>
+                    <button id="nav-roster" onclick="navigateTo('roster')" class="px-4 py-2 rounded-md text-slate-300 hover:bg-slate-800/40">Roster</button>
+                    <button id="nav-apply" onclick="navigateTo('apply')" class="px-4 py-2 rounded-md text-slate-300 hover:bg-slate-800/40">Apply Now</button>
+                    <button id="nav-admin" onclick="navigateTo('admin')" class="px-4 py-2 rounded-md text-red-400 border border-red-500/30 hover:bg-red-500/10">Admin Portal</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- CONTENT PORTAL AREA -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        
+        <!-- HOME PAGE -->
+        <section id="page-home" class="page-section space-y-12">
+            <div class="relative bg-gradient-to-br from-nbiBlue to-slate-900 rounded-2xl p-8 md:p-16 border border-slate-800 shadow-2xl">
+                <h1 class="text-4xl md:text-6xl font-black text-white leading-tight">Fidelity, Bravery, <br><span class="text-nbiGold">Integrity.</span></h1>
+                <p class="text-slate-300 mt-4 text-lg">San Andreas Federal Command Network Dashboard.</p>
+            </div>
+        </section>
+
+        <!-- INFORMATION PAGE -->
+        <section id="page-info" class="page-section hidden">
+            <h2 class="text-3xl font-black text-white uppercase mb-4">Bureau Information</h2>
+            <div class="bg-nbiSlate p-6 rounded-xl border border-slate-800">
+                <p class="text-slate-300 text-sm">Our investigative frameworks manage high profile syndicate enforcement initiatives state-wide.</p>
+            </div>
+        </section>
+
+        <!-- ROSTER PAGE (Now pulls live from database) -->
+        <section id="page-roster" class="page-section hidden space-y-8">
+            <div class="border-b border-slate-800 pb-4">
+                <h2 class="text-3xl font-black text-white uppercase">Active Roster</h2>
+                <p class="text-nbiGold text-xs tracking-wider uppercase font-mono mt-1">Live Database Matrix</p>
+            </div>
+            
+            <div id="live-roster-grid" class="grid md:grid-cols-3 gap-6">
+                <!-- JavaScript automatically places live data here -->
+                <p class="text-slate-500 text-sm animate-pulse">Establishing secure server link to main database records...</p>
+            </div>
+        </section>
+
+        <!-- APPLY NOW PAGE -->
+        <section id="page-apply" class="page-section hidden">
+            <h2 class="text-3xl font-black text-white uppercase mb-4">Recruitment Terminal</h2>
+            <div class="bg-nbiSlate p-8 rounded-xl border border-slate-800 max-w-xl">
+                <a href="#" target="_blank" class="block w-full text-center bg-nbiGold text-nbiBlue font-black py-4 rounded-lg uppercase text-sm tracking-wider">Launch Form</a>
+            </div>
+        </section>
+
+        <!-- SECURE ADMIN DASHBOARD MIGRATION PANEL -->
+        <section id="page-admin" class="page-section hidden space-y-8">
+            <div class="border-b border-red-500/30 pb-4">
+                <h2 class="text-3xl font-black text-red-500 uppercase">Internal Administration Terminal</h2>
+                <p class="text-slate-400 text-xs tracking-wider uppercase font-mono mt-1">Authorized Clearance Personnel Only</p>
+            </div>
+
+            <!-- LOGIN COMPONENT WINDOW -->
+            <div id="admin-login-box" class="max-w-md mx-auto bg-nbiSlate p-8 rounded-xl border border-red-500/20 shadow-2xl space-y-4">
+                <h3 class="text-lg font-bold text-white tracking-wide">Enter Encrypted Authorization Credentials</h3>
+                <form id="login-form" class="space-y-4">
+                    <div>
+                        <label class="block text-xs uppercase text-slate-400 mb-1 font-mono">Terminal Email</label>
+                        <input type="email" id="login-email" required class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white focus:outline-none focus:border-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase text-slate-400 mb-1 font-mono">Clearance Passkey</label>
+                        <input type="password" id="login-password" required class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white focus:outline-none focus:border-red-500">
+                    </div>
+                    <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded text-sm uppercase tracking-wider transition">Request Network Access</button>
+                </form>
+            </div>
+
+            <!-- AUTHENTICATED INTERNAL CONTROL CONSOLE (Hidden until logged in) -->
+            <div id="admin-control-dashboard" class="hidden space-y-8 animate-fade-in">
+                <div class="bg-slate-800/40 p-4 rounded border border-green-500/30 flex justify-between items-center">
+                    <p class="text-sm text-green-400 font-mono">✓ Secure Uplink Verified. Welcome, Administrator.</p>
+                    <button onclick="handleLogout()" class="bg-slate-700 hover:bg-slate-600 text-xs text-white px-3 py-1.5 rounded uppercase font-bold">Disconnect</button>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-8">
+                    <!-- Insertion Utility Form Module -->
+                    <div class="bg-nbiSlate p-6 rounded-xl border border-slate-700 space-y-4 h-fit">
+                        <h3 class="text-md font-bold text-white uppercase border-b border-slate-700 pb-2">Add New Personnel</h3>
+                        <form id="add-agent-form" class="space-y-3">
+                            <!-- Inside <form id="add-agent-form"> -->
+                            <div>
+                                <label class="text-xs uppercase text-slate-400 block mb-1">Agent Image URL (Optional)</label>
+                                <input type="url" id="new-agent-avatar" placeholder="e.g. https://imgur.com/your-image.png" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white focus:outline-none focus:border-red-500">
+                            </div>
+                            <div>
+                                <label class="text-xs uppercase text-slate-400 block mb-1">Agent Identity (In-Game Name)</label>
+                                <input type="text" id="new-agent-name" placeholder="Firstname_Lastname" required class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+                            </div>
+                            <div>
+                                <label class="text-xs uppercase text-slate-400 block mb-1">Designated Rank Title</label>
+                                <input type="text" id="new-agent-rank" placeholder="e.g. Senior Special Agent" required class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+                            </div>
+                            <div>
+                                <label class="text-xs uppercase text-slate-400 block mb-1">Department Division Block</label>
+                                <select id="new-agent-division" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-slate-300">
+                                    <option value="Directorate">Directorate</option>
+                                    <option value="Command Staff">Command Staff</option>
+                                    <option value="Field Agents">Field Agents</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="w-full bg-nbiGold hover:bg-yellow-600 text-nbiBlue font-black py-2 rounded text-xs uppercase tracking-wider transition">Publish to Active Network</button>
+                        </form>
+                    </div>
+
+                    <!-- Live Records Table with Immediate Delete Powers -->
+                    <div class="md:col-span-2 bg-nbiSlate p-6 rounded-xl border border-slate-700 space-y-4">
+                        <h3 class="text-md font-bold text-white uppercase border-b border-slate-700 pb-2">Active Network Directory Database Records</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm text-slate-300">
+                                <thead class="text-xs uppercase text-slate-400 bg-slate-900">
+                                    <tr>
+                                        <th class="p-3">Agent Code Name</th>
+                                        <th class="p-3">Rank Designation</th>
+                                        <th class="p-3">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-table-body">
+                                    <!-- Populated on load -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-nbiDarkBlue border-t border-slate-900 py-6 text-center text-xs text-slate-500">
+        <p>© 2026 National Bureau of Investigation — Federal Portal Management Architecture.</p>
+    </footer>
+
+    <script src="app.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>
