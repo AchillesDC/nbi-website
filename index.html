@@ -29,7 +29,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
                 <div class="flex items-center space-x-3 cursor-pointer select-none" onclick="navigateTo('home')">
-                    <div class="w-12 h-12 bg-gradient-to-br from-yellow-400 via-nbiGold to-yellow-600 rounded-full flex items-center justify-center font-black text-nbiBlue shadow-md tracking-tighter text-sm border border-yellow-300">NBI</div>
+                    <img src="public/fbi-logo.png" alt="FBI Logo" class="w-12 h-12 object-contain">
                     <div>
                         <span class="font-extrabold text-xl tracking-wider block text-white">F.B.I.</span>
                         <span class="text-[10px] text-nbiGold uppercase tracking-widest font-bold block">Federal Bureau of Investigation</span>
@@ -50,17 +50,42 @@
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <!-- HOME PAGE -->
         <section id="page-home" class="page-section space-y-12">
-            <div class="relative bg-gradient-to-br from-nbiBlue to-slate-900 rounded-2xl p-8 md:p-16 border border-slate-800 shadow-2xl">
-                <h1 class="text-4xl md:text-6xl font-black text-white leading-tight">Fidelity, Bravery, <br><span class="text-nbiGold">Integrity.</span></h1>
-                <p class="text-slate-300 mt-4 text-lg">San Andreas Federal Command Network Dashboard.</p>
+            <div class="relative bg-gradient-to-br from-nbiBlue to-slate-900 rounded-2xl p-8 md:p-16 border border-slate-800 shadow-2xl flex items-center justify-between">
+                <div>
+                    <h1 class="text-4xl md:text-6xl font-black text-white leading-tight">Fidelity, Bravery, <br><span class="text-nbiGold">Integrity.</span></h1>
+                    <p class="text-slate-300 mt-4 text-lg">San Andreas Federal Command Network Dashboard.</p>
+                </div>
+                
+                <!-- FBI LOGO IMAGE -->
+                <img src="public/fbi-logo.png" alt="FBI Logo" class="w-32 h-32 md:w-40 md:h-40 object-contain">
             </div>
 
             <!-- NEWS FEED SECTION -->
-            <div class="border-b border-slate-800 pb-4">
-                <h2 class="text-3xl font-black text-white uppercase">Latest News</h2>
-                <p class="text-nbiGold text-xs tracking-wider uppercase font-mono mt-1">Breaking Updates</p>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="md:col-span-2">
+                    <div class="border-b-2 border-nbiGold pb-4 mb-6">
+                        <h2 class="text-3xl font-black text-white uppercase">Latest News</h2>
+                        <p class="text-nbiGold text-xs tracking-wider uppercase font-mono mt-1">Breaking Updates</p>
+                    </div>
+                    <div id="news-feed" class="space-y-3"></div>
+                </div>
+
+                <!-- USEFUL LINKS SECTION -->
+                <div class="bg-nbiSlate p-6 rounded-xl border-2 border-red-500/40 shadow-lg space-y-4">
+                    <h3 class="text-lg font-black text-red-400 uppercase tracking-wider border-b border-red-500/30 pb-3">Quick Access</h3>
+                    <nav class="space-y-3 flex flex-col">
+                        <button onclick="navigateTo('roster')" class="text-left px-4 py-3 rounded bg-slate-900 hover:bg-red-500/20 text-slate-300 hover:text-red-300 font-semibold text-sm uppercase tracking-wide transition border border-slate-700 hover:border-red-500/50">
+                            📋 Active Roster
+                        </button>
+                        <button onclick="navigateTo('info')" class="text-left px-4 py-3 rounded bg-slate-900 hover:bg-red-500/20 text-slate-300 hover:text-red-300 font-semibold text-sm uppercase tracking-wide transition border border-slate-700 hover:border-red-500/50">
+                            ℹ️ Bureau Information
+                        </button>
+                        <button onclick="navigateTo('apply')" class="text-left px-4 py-3 rounded bg-slate-900 hover:bg-red-500/20 text-slate-300 hover:text-red-300 font-semibold text-sm uppercase tracking-wide transition border border-slate-700 hover:border-red-500/50">
+                            🎯 Apply Now
+                        </button>
+                    </nav>
+                </div>
             </div>
-            <div id="news-feed" class="space-y-3"></div>
         </section>
 
         <!-- INFORMATION PAGE -->
